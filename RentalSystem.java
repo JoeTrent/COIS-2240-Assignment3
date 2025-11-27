@@ -1,12 +1,20 @@
 import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
     private static RentalSystem instance;
+    File vehicleFile = new File("vehicles.csv");
+    File customerFile = new File("customers.csv");
+    File recordFile = new File("rental_records.csv");
     
     private RentalSystem() {
     	
@@ -21,6 +29,7 @@ public class RentalSystem {
 
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
+        saveVehicle(vehicle);
     }
 
     public void addCustomer(Customer customer) {
@@ -132,5 +141,39 @@ public class RentalSystem {
             if (c.getCustomerId() == id)
                 return c;
         return null;
+    }
+    
+    public void saveVehicle(Vehicle vehicle) {
+    	try(FileWriter file = new FileWriter(vehicleFile, true)){
+    		//file.append("\n");
+    		file.append(vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel());
+    	} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	}
+    
+    public void saveCustomer(Customer customer) {
+    	try(FileWriter file = new FileWriter(vehicleFile, true)){
+    		//file.append("\n");
+    		file.append(customer.getCustomerName()+ "," + customer.getCustomerId());
+    	} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    public void saveRecord(RentalRecord record) {
+    	
+    	try(FileWriter file = new FileWriter(vehicleFile, true)){
+    		//file.append("\n");
+    		file.append(record.getVehicle() + "," + record.getRecordDate() + "," + record.getRecordType() + "," + record.getCustomer() + "," + record.getTotalAmount());
+    	} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
     }
 }

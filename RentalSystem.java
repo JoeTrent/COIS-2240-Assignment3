@@ -146,7 +146,40 @@ public class RentalSystem {
     public void saveVehicle(Vehicle vehicle) {
     	try(FileWriter file = new FileWriter(vehicleFile, true)){
     		//file.append("\n");
-    		file.append(vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel());
+    		String info = vehicle.getInfo();
+    		String [] str = info.split("\\|");
+    		if(vehicle instanceof Car) {
+        		String numSeats = str[6].trim();
+    			file.append("Car" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + numSeats+ "," + vehicle.getStatus());
+    		}
+    		
+    		if(vehicle instanceof Minibus) {
+    			String acc = str[6];
+    			acc = acc.replace("Accessible: ", "").trim();
+    			file.append("Minibus" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + acc+ "," + vehicle.getStatus());
+    		}
+    		
+    		if(vehicle instanceof PickupTruck) {
+    			String cargo = str[6];
+    			cargo = cargo.replace("Cargo Size: ", "").trim();
+    			String trailer = str[7];
+    			trailer = trailer.replace("Has Trailer: ", "").trim();
+    			file.append("PickupTruck" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + cargo+ "," + vehicle.getStatus() + "," + trailer);
+    			
+    		}
+    		
+    		if(vehicle instanceof SportCar) {
+    			String seats = str[6];
+    			seats = seats.replace("Seats: ", "").trim();
+    			String horsePower = str[7].trim();
+    			horsePower = horsePower.replace("Horsepower: ", "").trim();
+    			String turbo = str[8].trim();
+    			turbo = turbo.replace("Turbo: ", "").trim();
+    			file.append("SportCar" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + seats+ "," + vehicle.getStatus() + "," + horsePower + "," + turbo);
+    			
+    		}
+    			
+    	//file.append("Car" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + Car.getNumSeats() + "," + vehicle.getStatus());
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -169,6 +202,7 @@ public class RentalSystem {
     	
     	try(FileWriter file = new FileWriter(vehicleFile, true)){
     		//file.append("\n");
+    		
     		file.append(record.getVehicle() + "," + record.getRecordDate() + "," + record.getRecordType() + "," + record.getCustomer() + "," + record.getTotalAmount());
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -176,4 +210,24 @@ public class RentalSystem {
 		}
     	
     }
-}
+    
+    private void loadData() {
+    	try(Scanner scanner = new Scanner(vehicleFile)){
+    		while(scanner.hasNextLine()) {
+    			
+    			String plate = scanner.nextLine();
+    			String make = scanner.next();
+    			String model = scanner.next();
+    			int year = scanner.nextInt();
+    			
+    			String status = scanner.next();
+    			Vehicle vehicle;
+    			
+    			
+    			}
+    			
+    		}catch (IOException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }

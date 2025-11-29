@@ -2,8 +2,10 @@ import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Scanner;
+
+
+
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -16,7 +18,9 @@ public class RentalSystem {
     File customerFile = new File("customers.csv");
     File recordFile = new File("rental_records.csv");
     
+    
     private RentalSystem() {
+    	loadData();
     	
     }
     
@@ -179,7 +183,6 @@ public class RentalSystem {
     			
     		}
     			
-    	//file.append("Car" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + Car.getNumSeats() + "," + vehicle.getStatus());
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -188,7 +191,7 @@ public class RentalSystem {
     	}
     
     public void saveCustomer(Customer customer) {
-    	try(FileWriter file = new FileWriter(vehicleFile, true)){
+    	try(FileWriter file = new FileWriter(customerFile, true)){
     		//file.append("\n");
     		file.append(customer.getCustomerName()+ "," + customer.getCustomerId());
     	} catch (IOException e) {
@@ -198,12 +201,16 @@ public class RentalSystem {
     	
     }
     
-    public void saveRecord(RentalRecord record) {
+    public void saveRecord(RentalRecord record) { // make so it saves the vehicles license plate and customerID
     	
-    	try(FileWriter file = new FileWriter(vehicleFile, true)){
+    	try(FileWriter file = new FileWriter(recordFile, true)){
     		//file.append("\n");
+    		Vehicle vehicle = record.getVehicle();
     		
-    		file.append(record.getVehicle() + "," + record.getRecordDate() + "," + record.getRecordType() + "," + record.getCustomer() + "," + record.getTotalAmount());
+    		Customer customer = record.getCustomer();
+    		
+    		
+    		file.append(vehicle.getLicensePlate() + "," + customer.getCustomerId() + "," + record.getRecordType() + "," + record.getRecordDate() + "," + record.getTotalAmount());
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -211,23 +218,132 @@ public class RentalSystem {
     	
     }
     
+    //go back to save task and make it so 
+    
     private void loadData() {
+    	
     	try(Scanner scanner = new Scanner(vehicleFile)){
     		while(scanner.hasNextLine()) {
+    			int i = 0;
+    			String plate;
+    			String make;
+    			String model;
+    			String status;
+    			int year;
+    			int numSeats;
+    			boolean acc;
+    			double cargoSize;
+    			boolean hasTrailer;
+    			int horsePower;
+    			boolean hasTurbo;
+    			Vehicle vehicle = null;
     			
-    			String plate = scanner.nextLine();
-    			String make = scanner.next();
-    			String model = scanner.next();
-    			int year = scanner.nextInt();
+    			String row = scanner.nextLine();
+    			String [] col = row.split(",");
+    			if(col[i].equals("Car")) {
+    				plate = col[i++];
+    				make = col[i++];
+    				model = col[i++];
+    				year = Integer.parseInt(col[i++]);
+    				numSeats = Integer.parseInt(col[i++]);
+    				status = col[i++];
+    				vehicle = new Car(make,model,year,numSeats);
+    				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
+    				vehicle.setStatus(stat);
+    				
+    			}
+    			if(col[i].equals("Minibus")) {
+    				plate = col[i++];
+    				make = col[i++];
+    				model = col[i++];
+    				year = Integer.parseInt(col[i++]);
+    				acc = Boolean.parseBoolean(col[i++]);
+    				status = col[i++];
+    				vehicle = new Minibus(make,model,year,acc);
+    				vehicle.setLicensePlate(plate);
+    				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
+    				vehicle.setStatus(stat);
+    			}
     			
-    			String status = scanner.next();
-    			Vehicle vehicle;
+    			if(col[i].equals("PickupTruck")) {
+    				plate = col[i++];
+    				make = col[i++];
+    				model = col[i++];
+    				year = Integer.parseInt(col[i++]);
+    				cargoSize = Double.parseDouble(col[i++]);
+    				status = col[i++];
+    				hasTrailer = Boolean.parseBoolean(col[i++]);
+    				vehicle = new PickupTruck(make,model,year,cargoSize,hasTrailer);
+    				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
+    				vehicle.setStatus(stat);
+    				
+    			}
     			
+    			if(col[i].equals("SportCar")) {
+    				plate = col[i++];
+    				make = col[i++];
+    				model = col[i++];
+    				year = Integer.parseInt(col[i++]);
+    				numSeats = Integer.parseInt(col[i++]);
+    				status = col[i++];
+    				horsePower = Integer.parseInt(col[i++]);
+    				hasTurbo = Boolean.parseBoolean(col[i++]);
+    				vehicle = new SportCar(make,model,year,numSeats,horsePower,hasTurbo);
+    				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
+    				vehicle.setStatus(stat);
+    				
+    			}
+    			if(vehicle != null)
+    			vehicles.add(vehicle);		
     			
     			}
     			
     		}catch (IOException e) {
     			e.printStackTrace();
     		}
+    	
+    	try(Scanner scanner = new Scanner(customerFile)){
+    		while(scanner.hasNextLine()) {
+    			int i = 0,iD;
+    			String row = scanner.nextLine();
+    			String [] col = row.split(",");
+    			String name;
+    			name = col[i];
+    			iD = Integer.parseInt(col[i++]);
+    			Customer customer = new Customer(iD,name);
+    			if(customer != null)
+    				customers.add(customer);
+    			
+    		}
+    		
+    	}catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
+    	try(Scanner scanner = new Scanner(recordFile)){
+    		while(scanner.hasNextLine()) {
+    			int i = 0;
+    			String row = scanner.nextLine();
+    			String [] col = row.split(",");
+    			String vecSearch = col[i];
+    			Vehicle vehicle = findVehicleByPlate(vecSearch);
+    			int custSearch = Integer.parseInt(col[i++]);
+    			Customer customer = findCustomerById(custSearch);
+    			String recType = col[i++];
+    			String recDate = col[i++];
+    			double totalAmount = Double.parseDouble(col[i++]);
+    			LocalDate date = LocalDate.parse(recDate);
+    			
+    			RentalRecord record = new RentalRecord(vehicle,customer,date,totalAmount,recType);
+    			rentalHistory.addRecord(record);
+    			
+    			
+    			
+    			
+    		}
+    	} catch(IOException e) {
+    		e.printStackTrace();
+    	}
+    	
     	}
     }

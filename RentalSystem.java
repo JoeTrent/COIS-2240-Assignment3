@@ -31,13 +31,34 @@ public class RentalSystem {
     	return instance;
     }
 
-    public void addVehicle(Vehicle vehicle) {
-        vehicles.add(vehicle);
-        saveVehicle(vehicle);
+    public boolean addVehicle(Vehicle vehicle) {
+    	String plateCheck = vehicle.getLicensePlate();
+    	Vehicle v = findVehicleByPlate(plateCheck);
+    	if(v.getLicensePlate() == vehicle.getLicensePlate() ) {
+    		System.out.print("Dupe found, did not add");
+    		return false;
+    	}
+    	else {
+    		vehicles.add(vehicle);
+            saveVehicle(vehicle);
+            System.out.print("Successfully added");
+            return true;
+    	}
     }
 
-    public void addCustomer(Customer customer) {
-        customers.add(customer);
+    public boolean addCustomer(Customer customer) {
+    	int idCheck = customer.getCustomerId();
+    	Customer c = findCustomerById(idCheck);
+    	if(c.getCustomerId() == customer.getCustomerId()) {
+    		System.out.print("Dupe found, did not add");
+    		return false;
+    	}
+    	else {
+    		customers.add(customer);
+    		//saveCustomer(customer);
+    		System.out.print("Successfully added");
+    		return true;
+    	}
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {

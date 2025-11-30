@@ -3,9 +3,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.File;
 import java.util.Scanner;
-
-
-
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -14,9 +11,9 @@ public class RentalSystem {
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
     private static RentalSystem instance;
-    File vehicleFile = new File("vehicles.csv");
-    File customerFile = new File("customers.csv");
-    File recordFile = new File("rental_records.csv");
+    File vehicleFile = new File("vehicles.txt");
+    File customerFile = new File("customers.txt");
+    File recordFile = new File("RentalRecords.txt");
     
     
     private RentalSystem() {
@@ -34,7 +31,7 @@ public class RentalSystem {
     public boolean addVehicle(Vehicle vehicle) {
     	String plateCheck = vehicle.getLicensePlate();
     	Vehicle v = findVehicleByPlate(plateCheck);
-    	if(v.getLicensePlate() == vehicle.getLicensePlate() ) {
+    	if(v != null && v.getLicensePlate().equals(vehicle.getLicensePlate()) ) {
     		System.out.print("Dupe found, did not add");
     		return false;
     	}
@@ -49,13 +46,13 @@ public class RentalSystem {
     public boolean addCustomer(Customer customer) {
     	int idCheck = customer.getCustomerId();
     	Customer c = findCustomerById(idCheck);
-    	if(c.getCustomerId() == customer.getCustomerId()) {
+    	if(c!= null && c.getCustomerId() == customer.getCustomerId()) {
     		System.out.print("Dupe found, did not add");
     		return false;
     	}
     	else {
     		customers.add(customer);
-    		//saveCustomer(customer);
+    		saveCustomer(customer);
     		System.out.print("Successfully added");
     		return true;
     	}
@@ -170,18 +167,18 @@ public class RentalSystem {
     
     public void saveVehicle(Vehicle vehicle) {
     	try(FileWriter file = new FileWriter(vehicleFile, true)){
-    		//file.append("\n");
+    		file.append("\n");
     		String info = vehicle.getInfo();
     		String [] str = info.split("\\|");
     		if(vehicle instanceof Car) {
         		String numSeats = str[6].trim();
-    			file.append("Car" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + numSeats+ "," + vehicle.getStatus());
+    			file.append("Car" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + numSeats+ "," + vehicle.getStatus() + "\n");
     		}
     		
     		if(vehicle instanceof Minibus) {
     			String acc = str[6];
     			acc = acc.replace("Accessible: ", "").trim();
-    			file.append("Minibus" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + acc+ "," + vehicle.getStatus());
+    			file.append("Minibus" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + acc+ "," + vehicle.getStatus() + "\n");
     		}
     		
     		if(vehicle instanceof PickupTruck) {
@@ -189,7 +186,7 @@ public class RentalSystem {
     			cargo = cargo.replace("Cargo Size: ", "").trim();
     			String trailer = str[7];
     			trailer = trailer.replace("Has Trailer: ", "").trim();
-    			file.append("PickupTruck" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + cargo+ "," + vehicle.getStatus() + "," + trailer);
+    			file.append("PickupTruck" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + cargo+ "," + vehicle.getStatus() + "," + trailer + "\n");
     			
     		}
     		
@@ -200,7 +197,7 @@ public class RentalSystem {
     			horsePower = horsePower.replace("Horsepower: ", "").trim();
     			String turbo = str[8].trim();
     			turbo = turbo.replace("Turbo: ", "").trim();
-    			file.append("SportCar" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + seats+ "," + vehicle.getStatus() + "," + horsePower + "," + turbo);
+    			file.append("SportCar" + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + seats+ "," + vehicle.getStatus() + "," + horsePower + "," + turbo + "\n");
     			
     		}
     			
@@ -213,8 +210,8 @@ public class RentalSystem {
     
     public void saveCustomer(Customer customer) {
     	try(FileWriter file = new FileWriter(customerFile, true)){
-    		//file.append("\n");
-    		file.append(customer.getCustomerName()+ "," + customer.getCustomerId());
+    		file.append("\n");
+    		file.append(customer.getCustomerId()+ "," + customer.getCustomerName() + "\n");
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -231,7 +228,7 @@ public class RentalSystem {
     		Customer customer = record.getCustomer();
     		
     		
-    		file.append(vehicle.getLicensePlate() + "," + customer.getCustomerId() + "," + record.getRecordType() + "," + record.getRecordDate() + "," + record.getTotalAmount());
+    		file.append(vehicle.getLicensePlate() + "," + customer.getCustomerId() + "," + record.getRecordType() + "," + record.getRecordDate() + "," + record.getTotalAmount() +"\n");
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -242,10 +239,9 @@ public class RentalSystem {
     //go back to save task and make it so 
     
     private void loadData() {
-    	
     	try(Scanner scanner = new Scanner(vehicleFile)){
+    		
     		while(scanner.hasNextLine()) {
-    			int i = 0;
     			String plate;
     			String make;
     			String model;
@@ -257,36 +253,43 @@ public class RentalSystem {
     			boolean hasTrailer;
     			int horsePower;
     			boolean hasTurbo;
-    			Vehicle vehicle = null;
-    			
     			String row = scanner.nextLine();
-    			String [] col = row.split(",");
-    			if(col[i].equals("Car")) {
+    			if(row.isEmpty())
+    			continue;
+    			String [] col = row.split("[,]");
+    			try {
+    				int i =0;
+    				Vehicle vehicle = null;
+    			String type = col[i++].trim();
+    			if(type.equals("Car")) {
     				plate = col[i++];
     				make = col[i++];
     				model = col[i++];
     				year = Integer.parseInt(col[i++]);
     				numSeats = Integer.parseInt(col[i++]);
     				status = col[i++];
+    				
     				vehicle = new Car(make,model,year,numSeats);
+    				vehicle.setLicensePlate(plate);
     				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
     				vehicle.setStatus(stat);
     				
     			}
-    			if(col[i].equals("Minibus")) {
+    			if(type.equals("Minibus")) {
     				plate = col[i++];
     				make = col[i++];
     				model = col[i++];
     				year = Integer.parseInt(col[i++]);
     				acc = Boolean.parseBoolean(col[i++]);
     				status = col[i++];
+    				
     				vehicle = new Minibus(make,model,year,acc);
     				vehicle.setLicensePlate(plate);
     				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
     				vehicle.setStatus(stat);
     			}
     			
-    			if(col[i].equals("PickupTruck")) {
+    			if(type.equals("PickupTruck")) {
     				plate = col[i++];
     				make = col[i++];
     				model = col[i++];
@@ -295,12 +298,13 @@ public class RentalSystem {
     				status = col[i++];
     				hasTrailer = Boolean.parseBoolean(col[i++]);
     				vehicle = new PickupTruck(make,model,year,cargoSize,hasTrailer);
+    				vehicle.setLicensePlate(plate);
     				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
     				vehicle.setStatus(stat);
     				
     			}
     			
-    			if(col[i].equals("SportCar")) {
+    			if(type.equals("SportCar")) {
     				plate = col[i++];
     				make = col[i++];
     				model = col[i++];
@@ -310,43 +314,60 @@ public class RentalSystem {
     				horsePower = Integer.parseInt(col[i++]);
     				hasTurbo = Boolean.parseBoolean(col[i++]);
     				vehicle = new SportCar(make,model,year,numSeats,horsePower,hasTurbo);
+    				vehicle.setLicensePlate(plate);
     				Vehicle.VehicleStatus stat = Vehicle.VehicleStatus.valueOf(status);
     				vehicle.setStatus(stat);
     				
     			}
     			if(vehicle != null)
-    			vehicles.add(vehicle);		
+    			vehicles.add(vehicle);	
+    			
+    			}catch(Exception e) {
+    				System.out.print("Bab vehicle row found: " + row);
+    			}
     			
     			}
+    	//	}
     			
     		}catch (IOException e) {
     			e.printStackTrace();
     		}
     	
+    	if(customerFile.exists()) {
     	try(Scanner scanner = new Scanner(customerFile)){
     		while(scanner.hasNextLine()) {
     			int i = 0,iD;
     			String row = scanner.nextLine();
     			String [] col = row.split(",");
     			String name;
-    			name = col[i];
+    			try {
     			iD = Integer.parseInt(col[i++]);
+    			name = col[i++];
     			Customer customer = new Customer(iD,name);
     			if(customer != null)
     				customers.add(customer);
+    			} catch(Exception e) {
+    				System.out.print("Bad vehicle row found: " + row);
+    			}
+    			
+    			
     			
     		}
     		
     	}catch (IOException e) {
     		e.printStackTrace();
     	}
+    	}
     	
+    	
+    	if(recordFile.exists()) {
     	try(Scanner scanner = new Scanner(recordFile)){
     		while(scanner.hasNextLine()) {
     			int i = 0;
     			String row = scanner.nextLine();
     			String [] col = row.split(",");
-    			String vecSearch = col[i];
+    			try {
+    			String vecSearch = col[i++];
     			Vehicle vehicle = findVehicleByPlate(vecSearch);
     			int custSearch = Integer.parseInt(col[i++]);
     			Customer customer = findCustomerById(custSearch);
@@ -358,6 +379,10 @@ public class RentalSystem {
     			RentalRecord record = new RentalRecord(vehicle,customer,date,totalAmount,recType);
     			rentalHistory.addRecord(record);
     			
+    			}catch(Exception e) {
+    				System.out.print("Bad record found: " + row);
+    			}
+    			
     			
     			
     			
@@ -367,4 +392,8 @@ public class RentalSystem {
     	}
     	
     	}
+    
+    } 
+  
+
     }

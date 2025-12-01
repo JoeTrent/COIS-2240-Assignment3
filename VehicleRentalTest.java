@@ -75,7 +75,21 @@ class VehicleRentalTest {
          assertEquals(Vehicle.VehicleStatus.Available, vehicle.getStatus(), "Vehicle should remain AVAILABLE");
      }
     
-    
+    @Test
+    void testSingletonRentalSystem() throws Exception {
+        
+        Constructor<RentalSystem> constructor = RentalSystem.class.getDeclaredConstructor();
+        
+        
+        int modifiers = constructor.getModifiers();
+
+        
+        assertEquals(Modifier.PRIVATE, modifiers & Modifier.PRIVATE, "RentalSystem constructor private");
+
+       
+        RentalSystem instance = RentalSystem.getInstance();
+        assertNotNull(instance, "RentalSystem.getInstance() return a non-null instance");
+    }
  }
 
 	

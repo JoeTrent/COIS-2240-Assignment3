@@ -39,6 +39,43 @@ class VehicleRentalTest {
 		});
 	}
 	
+
+	
+
+    @Test
+    public void testRentAndReturnVehicle() {
+        // --- Instantiate Vehicle and Customer ---
+    	RentalSystem rentalSystem = RentalSystem.getInstance();
+    	 Vehicle vehicle = new Car("Toyota", "Corolla", 2020, 5);
+         Customer customer = new Customer(1, "Dave");
+
+         
+         rentalSystem.addVehicle(vehicle);
+         rentalSystem.addCustomer(customer);
+
+         
+         assertEquals(Vehicle.VehicleStatus.Available, vehicle.getStatus(), "Vehicle should be AVAILABLE");
+
+       
+         rentalSystem.rentVehicle(vehicle, customer, LocalDate.now(), 100.0);
+         assertEquals(Vehicle.VehicleStatus.Rented, vehicle.getStatus(), "Vehicle should be RENTED");
+
+         
+         rentalSystem.rentVehicle(vehicle, customer, LocalDate.now(), 50.0);
+         
+         assertEquals(Vehicle.VehicleStatus.Rented, vehicle.getStatus(), "Vehicle should remain RENTED");
+
+         
+         rentalSystem.returnVehicle(vehicle, customer, LocalDate.now(), 0.0);
+         assertEquals(Vehicle.VehicleStatus.Available, vehicle.getStatus(), "Vehicle should be AVAILABLE");
+
+         
+         rentalSystem.returnVehicle(vehicle, customer, LocalDate.now(), 0.0);
+         
+         assertEquals(Vehicle.VehicleStatus.Available, vehicle.getStatus(), "Vehicle should remain AVAILABLE");
+     }
+    
+    
  }
 
 	
